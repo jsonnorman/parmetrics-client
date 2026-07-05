@@ -109,3 +109,27 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+
+.course-card {
+  width: fit-content;
+  margin: 0 auto 2rem auto;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.course-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.course-title-row h3 {
+  margin: 0;
+}
+
+.course-par {
+  margin: 4px 0 0 0;
+  padding-left: 0;
+  text-align: center;
+}

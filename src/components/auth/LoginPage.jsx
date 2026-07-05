@@ -45,7 +45,7 @@ export const LoginPage = ({ setCurrentUser }) => {
           onChange={(event) => setUsername(event.target.value)}
           required
         />
-
+        <br />
         <input
           type="password"
           placeholder="Password"
@@ -53,10 +53,10 @@ export const LoginPage = ({ setCurrentUser }) => {
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-
+        <br />
         <button className="btn">Sign In</button>
       </form>
-
+      <br />
       <p>
         Do not have an account?{" "}
         <Link to="/welcome/createaccount">Create one</Link>
