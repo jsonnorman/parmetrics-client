@@ -19,6 +19,9 @@ export const CourseListPage = () => {
     <div className="courses-container">
       <h2>Courses</h2>
 
+      <Link to="/courses/add"> <button>Add Course</button> </Link>
+      <br />
+      
       {courses.length === 0 ? (
         <p>No courses yet.</p>
       ) : (

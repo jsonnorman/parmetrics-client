@@ -133,3 +133,15 @@ code {
   padding-left: 0;
   text-align: center;
 }
+
+table {
+  margin: 1rem auto;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: center;
+}
