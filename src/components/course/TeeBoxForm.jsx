@@ -1,9 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 
 export const TeeBoxForm = () => {
   const navigate = useNavigate()
-  const { courseId } = useParams()
+  const { courseId, teeBoxId } = useParams()
+
+  const isEditing = teeBoxId !== undefined
 
   const [teeBox, setTeeBox] = useState({
     color: "",
@@ -11,12 +13,53 @@ export const TeeBoxForm = () => {
 
   const [holes, setHoles] = useState(
     Array.from({ length: 18 }, (_, index) => ({
+      id: null,
       hole_number: index + 1,
       yardage: "",
       par: "",
       handicap: "",
     }))
   )
+
+  useEffect(() => {
+    if (isEditing) {
+      fetch(`http://localhost:8000/tee_boxes/${teeBoxId}`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setTeeBox({
+            color: data.color,
+          })
+        })
+
+      fetch(`http://localhost:8000/holes?tee_box=${teeBoxId}`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const holeRows = Array.from({ length: 18 }, (_, index) => {
+            const existingHole = data.find(
+              (hole) => hole.hole_number === index + 1
+            )
+
+            return existingHole || {
+              id: null,
+              hole_number: index + 1,
+              yardage: "",
+              par: "",
+              handicap: "",
+            }
+          })
+
+          setHoles(holeRows)
+        })
+    }
+  }, [teeBoxId])
 
   const handleTeeBoxChange = (event) => {
     setTeeBox({
@@ -62,49 +105,78 @@ export const TeeBoxForm = () => {
       0
     )
 
-    const teeBoxResponse = await fetch("http://localhost:8000/tee_boxes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
-      },
-      body: JSON.stringify({
-        course_id: courseId,
-        color: teeBox.color,
-        total_yardage: totalYardage,
-      }),
-    })
+    if (isEditing) {
+      await fetch(`http://localhost:8000/tee_boxes/${teeBoxId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+        },
+        body: JSON.stringify({
+          course_id: courseId,
+          color: teeBox.color,
+          total_yardage: totalYardage,
+        }),
+      })
 
-    if (!teeBoxResponse.ok) {
-      alert("Unable to create tee box.")
-      return
-    }
+      for (const hole of completedHoles) {
+        await fetch(`http://localhost:8000/holes/${hole.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+          },
+          body: JSON.stringify({
+            tee_box_id: teeBoxId,
+            hole_number: hole.hole_number,
+            yardage: hole.yardage,
+            par: hole.par,
+            handicap: hole.handicap,
+          }),
+        })
+      }
 
-    const newTeeBox = await teeBoxResponse.json()
-
-    for (const hole of completedHoles) {
-      await fetch("http://localhost:8000/holes", {
+      navigate(`/courses/${courseId}`)
+    } else {
+      const teeBoxResponse = await fetch("http://localhost:8000/tee_boxes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
         },
         body: JSON.stringify({
-          tee_box_id: newTeeBox.id,
-          hole_number: hole.hole_number,
-          yardage: hole.yardage,
-          par: hole.par,
-          handicap: hole.handicap,
+          course_id: courseId,
+          color: teeBox.color,
+          total_yardage: totalYardage,
         }),
       })
-    }
 
-    navigate(`/courses/${courseId}`)
+      const newTeeBox = await teeBoxResponse.json()
+
+      for (const hole of completedHoles) {
+        await fetch("http://localhost:8000/holes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+          },
+          body: JSON.stringify({
+            tee_box_id: newTeeBox.id,
+            hole_number: hole.hole_number,
+            yardage: hole.yardage,
+            par: hole.par,
+            handicap: hole.handicap,
+          }),
+        })
+      }
+
+      navigate(`/courses/${courseId}`)
+    }
   }
 
   return (
     <div className="tee-box-form-container">
-      <h2>Add Tee Box</h2>
+      <h2>{isEditing ? "Edit Tee Box" : "Add Tee Box"}</h2>
 
       <form onSubmit={handleSave}>
         <input
@@ -116,7 +188,6 @@ export const TeeBoxForm = () => {
         />
 
         <h3>Hole Information</h3>
-
         <p>Enter either 9 holes or 18 holes.</p>
 
         <table>
@@ -165,7 +236,9 @@ export const TeeBoxForm = () => {
           </tbody>
         </table>
 
-        <button type="submit">Save Tee Box</button>
+        <button type="submit">
+          {isEditing ? "Save Changes" : "Save Tee Box"}
+        </button>
       </form>
     </div>
   )

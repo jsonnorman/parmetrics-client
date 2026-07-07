@@ -28,6 +28,7 @@ export const App = () => {
         <Route path="/courses" element={currentUser ? <CourseListPage /> : <Navigate to="/welcome/login" />} />
         <Route path="/courses/:courseId" element={currentUser ? <CourseDetailPage /> : <Navigate to="/welcome/login" />} />
         <Route path="/courses/:courseId/add-tee-box" element={currentUser ? <TeeBoxForm /> : <Navigate to="/welcome/login" />} />
+        <Route path="/courses/:courseId/tee-boxes/:teeBoxId/edit" element={currentUser ? <TeeBoxForm /> : <Navigate to="/welcome/login" />} />
         <Route path="/courses/add" element={currentUser ? <CourseForm /> : <Navigate to="/welcome/login" />} />
         <Route path="*" element={<Navigate to="/welcome" />} />
 
