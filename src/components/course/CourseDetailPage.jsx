@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
 
 export const CourseDetailPage = () => {
   const { courseId } = useParams()
+  const navigate = useNavigate()
 
   const [course, setCourse] = useState(null)
   const [teeBoxes, setTeeBoxes] = useState([])
   const [selectedTeeBoxId, setSelectedTeeBoxId] = useState("")
   const [holes, setHoles] = useState([])
 
-  useEffect(() => {
-    fetch(`http://localhost:8000/courses/${courseId}`, {
-      headers: {
-        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => setCourse(data))
+  const [isEditingCourse, setIsEditingCourse] = useState(false)
+  const [editedCourse, setEditedCourse] = useState({
+    name: "",
+    par: "",
+  })
 
+  const getTeeBoxes = () => {
     fetch(`http://localhost:8000/tee_boxes?course=${courseId}`, {
       headers: {
         Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
@@ -29,8 +28,23 @@ export const CourseDetailPage = () => {
 
         if (data.length > 0) {
           setSelectedTeeBoxId(data[0].id)
+        } else {
+          setSelectedTeeBoxId("")
+          setHoles([])
         }
       })
+  }
+
+  useEffect(() => {
+    fetch(`http://localhost:8000/courses/${courseId}`, {
+      headers: {
+        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setCourse(data))
+
+    getTeeBoxes()
   }, [courseId])
 
   useEffect(() => {
@@ -45,20 +59,148 @@ export const CourseDetailPage = () => {
     }
   }, [selectedTeeBoxId])
 
+  const handleEditedCourseChange = (event) => {
+    setEditedCourse({
+      ...editedCourse,
+      [event.target.name]: event.target.value,
+    })
+  }
+
+  const beginEditCourse = () => {
+    setEditedCourse({
+      name: course.name,
+      par: course.par,
+    })
+
+    setIsEditingCourse(true)
+  }
+
+  const cancelEditCourse = () => {
+    setIsEditingCourse(false)
+    setEditedCourse({
+      name: "",
+      par: "",
+    })
+  }
+
+  const saveEditedCourse = async () => {
+    const response = await fetch(`http://localhost:8000/courses/${courseId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+      },
+      body: JSON.stringify({
+        name: editedCourse.name,
+        par: editedCourse.par,
+      }),
+    })
+
+    if (!response.ok) {
+      alert("Error updating course.")
+      return
+    }
+
+    setCourse({
+      ...course,
+      name: editedCourse.name,
+      par: editedCourse.par,
+    })
+
+    setIsEditingCourse(false)
+  }
+
+  const deleteCourse = async () => {
+    const response = await fetch(`http://localhost:8000/courses/${courseId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+      },
+    })
+
+    if (!response.ok) {
+      alert("Error deleting course.")
+      return
+    }
+
+    navigate("/courses")
+  }
+
+  const deleteTeeBox = async () => {
+    const response = await fetch(
+      `http://localhost:8000/tee_boxes/${selectedTeeBoxId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+        },
+      }
+    )
+
+    if (!response.ok) {
+      alert("Error deleting tee box.")
+      return
+    }
+
+    getTeeBoxes()
+  }
+
   if (!course) {
     return <p>Loading course...</p>
   }
+
+  const isOwner =
+    course.user === Number(localStorage.getItem("parmetrics_user_id"))
 
   return (
     <div className="course-detail-container">
       <Link to="/courses">Back to Courses</Link>
 
-      <h2>{course.name}</h2>
-      <p>Par: {course.par}</p>
+      {isEditingCourse ? (
+        <div>
+          <h2>Edit Course</h2>
 
-      <Link to={`/courses/${courseId}/add-tee-box`}>
-        <button>Add Tee Box</button>
-      </Link>
+          <input
+            name="name"
+            value={editedCourse.name}
+            onChange={handleEditedCourseChange}
+          />
+
+          <br />
+
+          <input
+            name="par"
+            type="number"
+            value={editedCourse.par}
+            onChange={handleEditedCourseChange}
+          />
+
+          <br />
+
+          <button onClick={saveEditedCourse}>Save</button>
+          <button onClick={cancelEditCourse}>Cancel</button>
+        </div>
+      ) : (
+        <div>
+          <h2>{course.name}</h2>
+          <p>Par: {course.par}</p>
+
+          {isOwner && (
+            <>
+              <button onClick={beginEditCourse}>Edit Course</button>
+              <button onClick={deleteCourse}>Delete Course</button>
+            </>
+          )}
+        </div>
+      )}
+
+      <br />
+
+      {isOwner && (
+        <Link to={`/courses/${courseId}/add-tee-box`}>
+          <button>Add Tee Box</button>
+        </Link>
+      )}
 
       <section>
         <h3>Tee Boxes</h3>
@@ -77,6 +219,20 @@ export const CourseDetailPage = () => {
                 </option>
               ))}
             </select>
+
+            <br />
+
+            {isOwner && (
+              <>
+                <Link
+                  to={`/courses/${courseId}/tee-boxes/${selectedTeeBoxId}/edit`}
+                >
+                  <button>Edit Tee Box</button>
+                </Link>
+
+                <button onClick={deleteTeeBox}>Delete Tee Box</button>
+              </>
+            )}
 
             <h3>Scorecard</h3>
 
