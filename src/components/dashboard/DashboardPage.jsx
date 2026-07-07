@@ -27,6 +27,9 @@ export const DashboardPage = () => {
     <div className="dashboard-container">
       <h2>Dashboard</h2>
 
+      <Link to="/courses/add"> <button>Add Course</button> </Link>
+      <br />
+      
       <section>
         <h3>My Courses</h3>
 
