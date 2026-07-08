@@ -10,6 +10,7 @@ import { CourseListPage } from "./components/course/CourseListPage"
 import { CourseDetailPage } from "./components/course/CourseDetailPage"
 import { TeeBoxForm } from "./components/course/TeeBoxForm"
 import { CourseForm } from "./components/course/CourseForm"
+import { ProfilePage } from "./components/profile/ProfilePage"
 
 export const App = () => {
   const [currentUser, setCurrentUser] = useState( localStorage.getItem("parmetrics_token") ? {} : null )
@@ -24,6 +25,7 @@ export const App = () => {
         <Route path="/welcome/login" element={<LoginPage setCurrentUser={setCurrentUser} />} />
         <Route path="/welcome/createaccount" element={<RegisterPage setCurrentUser={setCurrentUser} />} />
 
+        <Route path="/profile" element={currentUser ? <ProfilePage /> : <Navigate to="/welcome/login" />} />
         <Route path="/dashboard" element={currentUser ? <DashboardPage /> : <Navigate to="/welcome/login" />} />
         <Route path="/courses" element={currentUser ? <CourseListPage /> : <Navigate to="/welcome/login" />} />
         <Route path="/courses/:courseId" element={currentUser ? <CourseDetailPage /> : <Navigate to="/welcome/login" />} />
