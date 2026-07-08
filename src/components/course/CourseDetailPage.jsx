@@ -152,6 +152,18 @@ export const CourseDetailPage = () => {
   const isOwner =
     course.user === Number(localStorage.getItem("parmetrics_user_id"))
 
+  const selectedTeeBox = teeBoxes.find(
+    (teeBox) => teeBox.id === Number(selectedTeeBoxId)
+  )
+
+  const totalPar = holes.reduce((total, hole) => {
+    return total + Number(hole.par)
+  }, 0)
+
+  const totalYardage = holes.reduce((total, hole) => {
+    return total + Number(hole.yardage)
+  }, 0)
+
   return (
     <div className="course-detail-container">
       <Link to="/courses">Back to Courses</Link>
@@ -239,25 +251,39 @@ export const CourseDetailPage = () => {
             {holes.length === 0 ? (
               <p>No holes have been added for this tee box.</p>
             ) : (
-              <table>
-                <thead>
+              <table className="scorecard">
+                <tbody>
                   <tr>
                     <th>Hole</th>
-                    <th>Yardage</th>
-                    <th>Par</th>
-                    <th>Handicap</th>
+                    {holes.map((hole) => (
+                      <td key={hole.id}>{hole.hole_number}</td>
+                    ))}
+                    <th>Total</th>
                   </tr>
-                </thead>
 
-                <tbody>
-                  {holes.map((hole) => (
-                    <tr key={hole.id}>
-                      <td>{hole.hole_number}</td>
-                      <td>{hole.yardage}</td>
-                      <td>{hole.par}</td>
-                      <td>{hole.handicap}</td>
-                    </tr>
-                  ))}
+                  <tr>
+                    <th>Yardage</th>
+                    {holes.map((hole) => (
+                      <td key={hole.id}>{hole.yardage}</td>
+                    ))}
+                    <td>{selectedTeeBox?.total_yardage || totalYardage}</td>
+                  </tr>
+
+                  <tr>
+                    <th>Par</th>
+                    {holes.map((hole) => (
+                      <td key={hole.id}>{hole.par}</td>
+                    ))}
+                    <td>{totalPar}</td>
+                  </tr>
+
+                  <tr>
+                    <th>Handicap</th>
+                    {holes.map((hole) => (
+                      <td key={hole.id}>{hole.handicap}</td>
+                    ))}
+                    <td>-</td>
+                  </tr>
                 </tbody>
               </table>
             )}

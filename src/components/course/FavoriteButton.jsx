@@ -1,8 +1,27 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export const FavoriteButton = ({ courseId }) => {
   const [isFavorited, setIsFavorited] = useState(false)
   const [favoriteId, setFavoriteId] = useState(null)
+
+  useEffect(() => {
+    fetch("http://localhost:8000/favorites", {
+      headers: {
+        Authorization: `Token ${localStorage.getItem("parmetrics_token")}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((favorites) => {
+        const matchingFavorite = favorites.find(
+          (favorite) => favorite.course.id === courseId
+        )
+
+        if (matchingFavorite) {
+          setIsFavorited(true)
+          setFavoriteId(matchingFavorite.id)
+        }
+      })
+  }, [courseId])
 
   const handleFavoriteClick = async () => {
     if (isFavorited) {
