@@ -1,16 +1,122 @@
-# React + Vite
+# Par Metrics
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Par Metrics is a full-stack golf scorecard management application designed to help golfers organize, manage, and share digital course scorecards. Users can create courses with multiple tee boxes, build 9-hole or 18-hole scorecards, and save favorite courses created by other users.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Related Repository
 
-## React Compiler
+**Backend API**
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+https://github.com/jsonnorman/parmetricapi
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Repository Layout
+
+| Folder | Description | Stack |
+|---------|-------------|-------|
+| `src/` | React application components, pages, services, and styling | React, JavaScript, Vite |
+| `public/` | Static assets | Vite |
+
+The frontend communicates with the Django REST API using the Fetch API over HTTP.
+
+---
+
+# Features
+
+- User registration and login
+- Secure token authentication
+- Dashboard displaying created and favorited courses
+- Create, edit, and delete golf courses
+- Add multiple tee boxes to each course
+- Support for both 9-hole and 18-hole scorecards
+- Favorite and unfavorite courses
+- Owner-only editing and deletion
+- Responsive golf-themed user interface
+
+---
+
+# Technologies Used
+
+### Frontend
+
+- React
+- React Router
+- JavaScript (ES6)
+- CSS
+- Fetch API
+- Vite
+
+### Backend
+
+- Django
+- Django REST Framework
+- SQLite
+
+---
+
+# Database Design
+
+Par Metrics utilizes a relational database with the following relationships:
+
+- One User can create many Courses.
+- One Course can contain many Tee Boxes.
+- One Tee Box contains many Holes.
+- Users and Courses share a many-to-many relationship through the Favorites table.
+
+Ownership validation is enforced on the backend to ensure users can only modify resources they created.
+
+---
+
+# Installation
+
+## Clone the repository
+
+```bash
+git clone https://github.com/jsonnorman/parmetrics-client.git
+```
+
+## Install dependencies
+
+```bash
+npm install
+```
+
+## Start the development server
+
+```bash
+npm run dev
+```
+
+The frontend runs at:
+
+```
+http://localhost:5173
+```
+
+The backend API must also be running.
+
+---
+
+# Authentication
+
+Par Metrics uses Django REST Framework Token Authentication.
+
+Users can:
+
+- Register
+- Login
+- Access protected endpoints
+- Create and manage their own courses
+- Favorite courses created by other users
+
+---
+
+# Author
+
+**Jason Norman**
+
+Nashville Software School
+
+Full Stack Software Development Capstone
